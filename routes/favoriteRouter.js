@@ -37,7 +37,10 @@ favoriteRouter
             })
             .catch((err) => next(err));
         } else {
-          Favorite.create().then((favorites) => {
+          Favorite.create({
+            user: req.user._id,
+            campsites: [req.params.campsiteId],
+          }).then((favorites) => {
             res.statusCode = 200;
             res.setHeader("Content-Type", "application/json");
             res.json(favorites.user, favorites.campsites);
@@ -118,19 +121,19 @@ favoriteRouter
 
   .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Favorite.findOne({ user: req.user._id })
-      .then((favorite) => {
-        if (favorite) {
-          const index = favorite.campsites.indexOf(req.params.campsiteId);
+      .then((favorites) => {
+        if (favorites) {
+          const index = favorites.campsites.indexOf(req.params.campsiteId);
           if (index >= 0) {
-            favorite.campsites.splice(index, 1);
+            favorites.campsites.splice(index, 1);
           }
-          favorite
+          favorites
             .save()
-            .then((favorite) => {
-              console.log(`${req.params.campsiteId} Deleted!`, favorite);
+            .then((favorites) => {
+              console.log(`${req.params.campsiteId} Deleted!`, favorites);
               res.statusCode = 200;
               res.setHeader("Content-Type", "application/json");
-              res.json(favorite);
+              res.json(favorites);
             })
             .catch((err) => next(err));
         } else {
